@@ -448,7 +448,8 @@
     - name: Install Alerta dependencies
       apt:
         name:
-          - python3-pip
+          - alerta
+          - alerta-web
           - mongodb-org
           - nginx
           - python3-dev
@@ -456,11 +457,6 @@
           - libffi-dev
         state: present
         update_cache: yes
-
-    - name: Install Alerta via pip
-      pip:
-        name: alerta-server
-        state: present
 
     - name: Create Alerta configuration directory
       file:

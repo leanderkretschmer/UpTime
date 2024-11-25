@@ -1,6 +1,6 @@
 ---
 - name: Setup Monitoring System
-  hosts: all
+  hosts: monitoring_server
   become: yes
   vars:
     git_repo: "https://github.com/leanderkretschmer/UpTime/"

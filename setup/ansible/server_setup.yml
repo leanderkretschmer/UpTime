@@ -520,6 +520,15 @@
         system: yes
         shell: /bin/false
         home: /opt/alerta
+        create_home: yes
+
+    - name: Create Alerta directory
+      file:
+        path: /opt/alerta
+        state: directory
+        mode: '0755'
+        owner: alerta
+        group: alerta
 
     - name: Set Alerta permissions
       file:

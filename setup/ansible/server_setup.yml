@@ -43,15 +43,6 @@
         dest: "{{ tmp_dir }}"
         version: main
 
-    - name: Verify backend directory exists
-      stat:
-        path: "{{ tmp_dir }}/backend"
-      register: backend_dir_stat
-
-    - name: Show backend directory status
-      debug:
-        var: backend_dir_stat
-
     - name: Create backend directory
       file:
         path: "{{ backend_dir }}"
@@ -66,11 +57,24 @@
 
     - name: Copy backend files
       command: "cp -r {{ tmp_dir }}/backend/* {{ backend_dir }}/"
-      when: backend_dir_stat.stat.exists
+      ignore_errors: yes
 
     - name: Copy frontend files
       command: "cp -r {{ tmp_dir }}/frontend/* {{ frontend_dir }}/"
-      when: backend_dir_stat.stat.exists
+      ignore_errors: yes
+
+    - name: Create requirements.txt
+      copy:
+        dest: "{{ backend_dir }}/requirements.txt"
+        content: |
+          flask==2.0.1
+          flask-cors==3.0.10
+          flask-jwt-extended==4.3.1
+          flask-sqlalchemy==2.5.1
+          psycopg2-binary==2.9.1
+          ansible-runner==2.1.1
+          python-dotenv==0.19.0
+          gunicorn==20.1.0
 
     - name: Setup Python virtual environment
       pip:

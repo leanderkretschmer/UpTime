@@ -11,6 +11,15 @@
     db_password: "your_password"
     db_name: "uptime"
 
+  pre_tasks:
+    - name: Install Python PostgreSQL dependencies
+      apt:
+        name:
+          - python3-psycopg2
+          - acl
+        state: present
+        update_cache: yes
+
   tasks:
     - name: Install required packages
       apt:

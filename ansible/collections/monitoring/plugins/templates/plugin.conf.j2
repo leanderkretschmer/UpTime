@@ -1,0 +1,44 @@
+# Plugin configuration template
+command[check_ping]={{ item.args }}
+command[check_http]={{ item.args }}
+command[check_ssh]={{ item.args }}
+command[check_disk]={{ item.args }}
+command[check_load]={{ item.args }}
+command[check_users]={{ item.args }}
+command[check_swap]={{ item.args }}
+
+# Custom checks with Alerta integration
+command[check_service]=/opt/monitoring/plugins/check_wrapper.py check_service.sh $ARG1$ $ARG2$ $ARG3$
+command[check_custom_ping]=/opt/monitoring/plugins/check_wrapper.py check_custom_ping.sh $HOSTADDRESS$ $ARG1$ $ARG2$
+
+# Default check intervals
+interval[check_ping]=1m
+interval[check_http]=2m
+interval[check_ssh]=5m
+interval[check_disk]=15m
+interval[check_load]=1m
+interval[check_users]=5m
+interval[check_swap]=15m
+interval[check_service]=1m
+interval[check_custom_ping]=30s
+
+# Retry settings
+retry[check_ping]=3
+retry[check_http]=2
+retry[check_ssh]=2
+retry[check_disk]=1
+retry[check_load]=1
+retry[check_users]=1
+retry[check_swap]=1
+retry[check_service]=2
+retry[check_custom_ping]=3
+
+# Alert thresholds
+threshold[check_ping]=w:100,c:500
+threshold[check_http]=w:2,c:5
+threshold[check_disk]=w:20%,c:10%
+threshold[check_load]=w:5,10,15,c:10,20,30
+threshold[check_users]=w:5,c:10
+threshold[check_swap]=w:20%,c:10%
+threshold[check_service]=w:1,c:2
+threshold[check_custom_ping]=w:50,c:100

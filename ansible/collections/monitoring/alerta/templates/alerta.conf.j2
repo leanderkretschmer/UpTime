@@ -1,0 +1,28 @@
+CORS_ORIGINS = ['*']
+AUTH_REQUIRED = True
+ADMIN_USERS = ['admin@alerta.io']
+PLUGINS = ['reject', 'heartbeat', 'blackout']
+PLUGINS_REJECT = {}
+PLUGINS_HEARTBEAT = {}
+PLUGINS_BLACKOUT = {}
+
+MONGO_URI = 'mongodb://localhost:27017/monitoring'
+DATABASE_NAME = 'monitoring'
+
+SEVERITY_MAP = {
+    'critical': 1,
+    'major': 2,
+    'minor': 3,
+    'warning': 4,
+    'indeterminate': 5,
+    'informational': 6,
+    'normal': 7,
+    'ok': 7,
+    'cleared': 7,
+    'debug': 8,
+    'trace': 9,
+    'unknown': 10
+}
+
+DEFAULT_PAGE_SIZE = 50
+ALARM_MODEL = 'ALERTA' 

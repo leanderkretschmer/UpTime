@@ -1,0 +1,32 @@
+#!/bin/bash
+# Custom ping check with response time tracking
+
+HOST=$1
+WARNING=$2
+CRITICAL=$3
+COUNT=5
+
+if [ -z "$HOST" ]; then
+    echo "UNKNOWN - No host specified"
+    exit 3
+fi
+
+RESULT=$(ping -c $COUNT $HOST 2>/dev/null)
+STATUS=$?
+
+if [ $STATUS -eq 0 ]; then
+    AVG=$(echo "$RESULT" | tail -1 | awk -F '/' '{print $5}')
+    if (( $(echo "$AVG > $CRITICAL" | bc -l) )); then
+        echo "CRITICAL - Ping response time ${AVG}ms > ${CRITICAL}ms | response_time=${AVG}ms"
+        exit 2
+    elif (( $(echo "$AVG > $WARNING" | bc -l) )); then
+        echo "WARNING - Ping response time ${AVG}ms > ${WARNING}ms | response_time=${AVG}ms"
+        exit 1
+    else
+        echo "OK - Ping response time ${AVG}ms | response_time=${AVG}ms"
+        exit 0
+    fi
+else
+    echo "CRITICAL - Host $HOST is unreachable"
+    exit 2
+fi 

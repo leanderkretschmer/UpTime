@@ -1,0 +1,23 @@
+#!/bin/bash
+# Custom service check plugin
+
+SERVICE=$1
+WARN_THRESHOLD=$2
+CRIT_THRESHOLD=$3
+
+if [ -z "$SERVICE" ]; then
+    echo "UNKNOWN - No service specified"
+    exit 3
+fi
+
+STATUS=$(systemctl is-active $SERVICE)
+LOAD=$(systemctl show $SERVICE -p LoadState | cut -d'=' -f2)
+MEMORY=$(systemctl show $SERVICE -p MemoryCurrent | cut -d'=' -f2)
+
+if [ "$STATUS" = "active" ]; then
+    echo "OK - Service $SERVICE is running | load=$LOAD memory=$MEMORY"
+    exit 0
+else
+    echo "CRITICAL - Service $SERVICE is not running"
+    exit 2
+fi 

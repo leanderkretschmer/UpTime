@@ -1,1 +1,56 @@
- 
+---
+- name: Install Alerta dependencies
+  apt:
+    name:
+      - python3-pip
+      - mongodb
+      - nginx
+    state: present
+    update_cache: yes
+
+- name: Install Alerta via pip
+  pip:
+    name: alerta-server
+    state: present
+
+- name: Create Alerta configuration directory
+  file:
+    path: /etc/alerta
+    state: directory
+    mode: '0755'
+
+- name: Configure Alerta
+  template:
+    src: alerta.conf.j2
+    dest: /etc/alerta/alerta.conf
+    mode: '0644'
+  notify: restart alerta
+
+- name: Configure Nginx for Alerta
+  template:
+    src: nginx-alerta.conf.j2
+    dest: /etc/nginx/sites-available/alerta
+  notify: reload nginx
+
+- name: Enable Alerta site
+  file:
+    src: /etc/nginx/sites-available/alerta
+    dest: /etc/nginx/sites-enabled/alerta
+    state: link
+  notify: reload nginx
+
+- name: Create Alerta systemd service
+  template:
+    src: alerta.service.j2
+    dest: /etc/systemd/system/alerta.service
+  notify: restart alerta
+
+- name: Start and enable Alerta
+  systemd:
+    name: alerta
+    state: started
+    enabled: yes
+
+- name: Display Alerta web interface URL
+  debug:
+    msg: "Alerta web interface is available at: http://{{ ansible_host }}:8080" 

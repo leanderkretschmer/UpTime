@@ -1,0 +1,14 @@
+[Unit]
+Description=Alerta API Server
+After=network.target mongodb.service
+
+[Service]
+Type=simple
+User=alerta
+Group=alerta
+Environment="ALERTA_SVR_CONF_FILE=/etc/alerta/alerta.conf"
+ExecStart=/usr/local/bin/alertad run
+Restart=always
+
+[Install]
+WantedBy=multi-user.target 

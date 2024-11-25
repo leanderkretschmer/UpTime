@@ -1,0 +1,23 @@
+# SNMP Configuration
+agentAddress udp:161
+rocommunity public
+
+# System information
+sysLocation    Datacenter
+sysContact     admin@example.com
+sysServices    72
+
+# Load monitoring
+load 5 10 15
+
+# Process monitoring
+proc sshd
+proc nginx
+proc postgres
+
+# Disk monitoring
+disk /
+includeAllDisks 10%
+
+# Memory monitoring
+swap 100000 

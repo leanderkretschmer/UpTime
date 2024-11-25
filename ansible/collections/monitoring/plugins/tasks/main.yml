@@ -1,0 +1,74 @@
+---
+- name: Install monitoring plugins dependencies
+  apt:
+    name:
+      - monitoring-plugins
+      - nagios-plugins
+      - nagios-plugins-basic
+      - nagios-plugins-standard
+      - nagios-snmp-plugins
+      - fping
+      - snmp
+      - snmpd
+    state: present
+    update_cache: yes
+
+- name: Create monitoring plugins directory
+  file:
+    path: /opt/monitoring/plugins
+    state: directory
+    mode: '0755'
+
+- name: Copy custom monitoring plugins
+  template:
+    src: "{{ item }}"
+    dest: "/opt/monitoring/plugins/"
+    mode: '0755'
+  with_fileglob:
+    - "templates/plugins/*.sh.j2"
+
+- name: Configure SNMP
+  template:
+    src: snmpd.conf.j2
+    dest: /etc/snmp/snmpd.conf
+  notify: restart snmpd
+
+- name: Create plugin configuration directory
+  file:
+    path: /etc/monitoring/plugins
+    state: directory
+    mode: '0755'
+
+- name: Configure plugins
+  template:
+    src: plugin.conf.j2
+    dest: "/etc/monitoring/plugins/{{ item.name }}.conf"
+    mode: '0644'
+  with_items:
+    - { name: 'check_ping', args: '-H $HOSTADDRESS$ -w 100.0,20% -c 500.0,60%' }
+    - { name: 'check_http', args: '-H $HOSTADDRESS$ -w 2 -c 5' }
+    - { name: 'check_ssh', args: '-H $HOSTADDRESS$ -p 22' }
+    - { name: 'check_disk', args: '-w 20% -c 10% -p /' }
+    - { name: 'check_load', args: '-w 15,10,5 -c 30,25,20' }
+    - { name: 'check_users', args: '-w 5 -c 10' }
+    - { name: 'check_swap', args: '-w 20% -c 10%' }
+
+- name: Create monitoring user
+  user:
+    name: monitoring
+    system: yes
+    shell: /bin/false
+    home: /opt/monitoring
+
+- name: Set plugin permissions
+  file:
+    path: /opt/monitoring/plugins
+    owner: monitoring
+    group: monitoring
+    recurse: yes
+
+handlers:
+  - name: restart snmpd
+    systemd:
+      name: snmpd
+      state: restarted 

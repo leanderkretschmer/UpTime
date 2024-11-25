@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+import os
+import json
+import requests
+import logging
+from datetime import datetime
+
+# Konfiguration laden
+with open('/etc/monitoring/plugins/alerta-integration.conf') as f:
+    exec(f.read())
+
+def send_alert(template_name, **kwargs):
+    """Alert an Alerta senden"""
+    if template_name not in ALERT_TEMPLATES:
+        logging.error(f"Unknown alert template: {template_name}")
+        return False
+    
+    template = ALERT_TEMPLATES[template_name]
+    alert_data = {
+        'attributes': {
+            'origin': 'monitoring-plugin'
+        },
+        'createTime': datetime.utcnow().isoformat() + 'Z',
+        'timeout': 86400
+    }
+    
+    # Template mit Daten füllen
+    for key, value in template.items():
+        if isinstance(value, str):
+            alert_data[key] = value.format(**kwargs)
+        else:
+            alert_data[key] = value
+
+    # Alert senden
+    headers = {
+        'Authorization': f'Key {ALERTA_API_KEY}',
+        'Content-Type': 'application/json'
+    }
+    
+    try:
+        response = requests.post(
+            f"{ALERTA_API_URL}/alert",
+            headers=headers,
+            data=json.dumps(alert_data)
+        )
+        response.raise_for_status()
+        return True
+    except Exception as e:
+        logging.error(f"Failed to send alert: {e}")
+        return False
+
+def map_status(plugin_status):
+    """Plugin-Status zu Alerta-Severity mappen"""
+    return STATUS_MAPPING.get(plugin_status.upper(), 'unknown')
+
+if __name__ == '__main__':
+    # Test-Alert senden
+    send_alert('service_down', 
+        service_name='test-service',
+        status='CRITICAL',
+        message='Test alert'
+    ) 

@@ -1,0 +1,42 @@
+# Alerta Integration Configuration
+ALERTA_API_URL="http://localhost:8080/api"
+ALERTA_API_KEY="{{ alerta_api_key }}"
+
+# Mapping von Plugin-Status zu Alerta-Severity
+STATUS_MAPPING = {
+    'OK': 'normal',
+    'WARNING': 'warning',
+    'CRITICAL': 'critical',
+    'UNKNOWN': 'unknown'
+}
+
+# Service-Gruppen
+SERVICE_GROUPS = {
+    'web': ['http', 'https'],
+    'database': ['postgresql', 'mysql'],
+    'system': ['cpu', 'memory', 'disk']
+}
+
+# Alert Templates
+ALERT_TEMPLATES = {
+    'service_down': {
+        'resource': '{{ "{{" }} service_name {{ "}}" }}',
+        'event': 'ServiceDown',
+        'environment': 'Production',
+        'severity': 'critical',
+        'service': ['monitoring'],
+        'group': 'Service',
+        'value': '{{ "{{" }} status {{ "}}" }}',
+        'text': 'Service {{ "{{" }} service_name {{ "}}" }} is down: {{ "{{" }} message {{ "}}" }}'
+    },
+    'high_ping': {
+        'resource': '{{ "{{" }} host {{ "}}" }}',
+        'event': 'HighLatency',
+        'environment': 'Production',
+        'severity': 'warning',
+        'service': ['network'],
+        'group': 'Network',
+        'value': '{{ "{{" }} ping_ms {{ "}}" }}ms',
+        'text': 'High ping latency to {{ "{{" }} host {{ "}}" }}: {{ "{{" }} ping_ms {{ "}}" }}ms'
+    }
+} 

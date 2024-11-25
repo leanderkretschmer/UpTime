@@ -1,0 +1,66 @@
+---
+- name: Install Checker dependencies
+  apt:
+    name:
+      - python3-pip
+      - python3-dev
+      - libssl-dev
+      - sysstat
+      - net-tools
+    state: present
+    update_cache: yes
+
+- name: Install Python packages for Checker
+  pip:
+    name:
+      - psutil
+      - requests
+      - ping3
+      - pysnmp
+    state: present
+
+- name: Create Checker directory
+  file:
+    path: /opt/checker
+    state: directory
+    mode: '0755'
+
+- name: Copy Checker scripts
+  template:
+    src: "{{ item }}"
+    dest: "/opt/checker/{{ item | basename | regex_replace('\\.j2$', '') }}"
+    mode: '0755'
+  with_fileglob:
+    - "templates/scripts/*.py.j2"
+
+- name: Create Checker configuration
+  template:
+    src: checker.conf.j2
+    dest: /etc/checker/checker.conf
+    mode: '0644'
+
+- name: Create Checker systemd service
+  template:
+    src: checker.service.j2
+    dest: /etc/systemd/system/checker.service
+  notify: restart checker
+
+- name: Create Checker timer
+  template:
+    src: checker.timer.j2
+    dest: /etc/systemd/system/checker.timer
+  notify: restart checker
+
+- name: Enable and start Checker timer
+  systemd:
+    name: checker.timer
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+handlers:
+  - name: restart checker
+    systemd:
+      name: checker
+      state: restarted
+      daemon_reload: yes 

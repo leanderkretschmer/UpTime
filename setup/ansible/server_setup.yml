@@ -70,6 +70,11 @@
     - name: Copy backend files
       shell: "cp -r {{ tmp_dir }}/backend/* {{ backend_dir }}/ || true"
 
+    - name: Initialize Vue.js project
+      command: "npm create vite@latest {{ frontend_dir }} -- --template vue-ts --force"
+      args:
+        creates: "{{ frontend_dir }}/package.json"
+
     - name: Copy frontend files
       shell: "cp -r {{ tmp_dir }}/frontend/* {{ frontend_dir }}/ || true"
 
@@ -91,6 +96,38 @@
         requirements: "{{ backend_dir }}/requirements.txt"
         virtualenv: "{{ backend_dir }}/venv"
         virtualenv_command: python3 -m venv
+
+    - name: Create package.json for frontend
+      copy:
+        dest: "{{ frontend_dir }}/package.json"
+        content: |
+          {
+            "name": "uptime-frontend",
+            "version": "0.0.1",
+            "private": true,
+            "scripts": {
+              "dev": "vite",
+              "build": "vue-tsc && vite build",
+              "preview": "vite preview"
+            },
+            "dependencies": {
+              "vue": "^3.3.4",
+              "vue-router": "^4.0.0",
+              "pinia": "^2.0.0",
+              "@heroicons/vue": "^2.0.0",
+              "axios": "^1.0.0",
+              "@headlessui/vue": "^1.0.0"
+            },
+            "devDependencies": {
+              "@vitejs/plugin-vue": "^4.2.3",
+              "typescript": "^5.0.2",
+              "vite": "^4.4.5",
+              "vue-tsc": "^1.8.5",
+              "tailwindcss": "^3.0.0",
+              "postcss": "^8.0.0",
+              "autoprefixer": "^10.0.0"
+            }
+          }
 
     - name: Install frontend dependencies
       npm:

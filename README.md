@@ -1,8 +1,6 @@
 # UpTime - Server & Service Monitoring System
 
-UpTime ist eine moderne Monitoring-Lösung, die aus einer iOS App und einem Server-Backend besteht. Das System ermöglicht autonomes Monitoring von Servern und Services mit automatischer Einrichtung und Gruppierung.
-
-## 🌟 Features
+## Features
 
 ### Monitoring
 - Echtzeit-Überwachung von Servern und Services
@@ -47,7 +45,7 @@ UpTime ist eine moderne Monitoring-Lösung, die aus einer iOS App und einem Serv
 - Server & Service Management
 - Konfigurationsmanagement
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Voraussetzungen
 - Debian-basiertes System (Debian 11 oder neuer)
@@ -61,7 +59,7 @@ UpTime ist eine moderne Monitoring-Lösung, die aus einer iOS App und einem Serv
 3. iOS App aus dem App Store installieren
 4. System mit Web-Interface verbinden
 
-## 📋 Roadmap
+## Roadmap
 
 ### Phase 1 - Basis (Must Have)
 - [x] Server Monitoring Grundfunktionen
@@ -70,27 +68,25 @@ UpTime ist eine moderne Monitoring-Lösung, die aus einer iOS App und einem Serv
 - [x] Web-Interface Basis
 - [x] Automatische Server-Einrichtung
 
-### Phase 2 - Erweiterungen (Should Have)
+### Phase 2 - Erweiterungen 
 - [ ] Erweiterte Gruppenfunktionen
 - [ ] Custom Monitoring Templates
 - [ ] Erweiterte Statistiken
 - [ ] API-Dokumentation
 - [ ] Multi-User Support
 
-### Phase 3 - Optimierung (Could Have)
+### Phase 3 - Optimierung 
 - [ ] Performance Analytics
 - [ ] Machine Learning für Anomalie-Erkennung
 - [ ] Predictive Maintenance
 - [ ] Custom Plugin System
-- [ ] Integration mit CI/CD Systemen
 
-### Phase 4 - Zukunft (Won't Have This Time)
+### Phase 4 - Zukunft 
 - [ ] Container Monitoring
-- [ ] Cloud Provider Integration
 - [ ] Cross-Platform Mobile Apps
 - [ ] IoT Device Monitoring
 
-## 🛠 Technologie-Stack
+## Technologie-Stack
 
 ### Backend
 - Python/Flask (REST API)
@@ -110,22 +106,3 @@ UpTime ist eine moderne Monitoring-Lösung, die aus einer iOS App und einem Serv
 - Let's Encrypt (SSL)
 - Docker (Container)
 - Celery (Task Queue)
-
-## 📱 App Store
-
-Die iOS App ist kostenlos im App Store verfügbar:
-[UpTime im App Store](link-zum-app-store)
-
-## 🤝 Contributing
-
-Wir freuen uns über Beiträge! Bitte lesen Sie unsere [Contributing Guidelines](CONTRIBUTING.md) für Details.
-
-## 📄 Lizenz
-
-Dieses Projekt ist unter der MIT Lizenz lizenziert - siehe [LICENSE.md](LICENSE.md) für Details.
-
-## 🙏 Acknowledgments
-
-- Alerta Team für die Monitoring Engine
-- Ansible Community
-- Alle Contributors und Tester 

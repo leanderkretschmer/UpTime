@@ -26,6 +26,11 @@
         state: present
         update_cache: yes
 
+    - name: Remove old temporary directory if exists
+      file:
+        path: "{{ tmp_dir }}"
+        state: absent
+
     - name: Create temporary directory
       file:
         path: "{{ tmp_dir }}"
@@ -37,6 +42,15 @@
         repo: "{{ git_repo }}"
         dest: "{{ tmp_dir }}"
         version: main
+
+    - name: Verify backend directory exists
+      stat:
+        path: "{{ tmp_dir }}/backend"
+      register: backend_dir_stat
+
+    - name: Show backend directory status
+      debug:
+        var: backend_dir_stat
 
     - name: Create backend directory
       file:
@@ -50,23 +64,13 @@
         state: directory
         mode: '0755'
 
-    - name: Synchronize backend files
-      synchronize:
-        src: "{{ tmp_dir }}/backend/"
-        dest: "{{ backend_dir }}/"
-        rsync_opts:
-          - "--exclude=.git"
-          - "--exclude=__pycache__"
-      delegate_to: "{{ inventory_hostname }}"
+    - name: Copy backend files
+      command: "cp -r {{ tmp_dir }}/backend/* {{ backend_dir }}/"
+      when: backend_dir_stat.stat.exists
 
-    - name: Synchronize frontend files
-      synchronize:
-        src: "{{ tmp_dir }}/frontend/"
-        dest: "{{ frontend_dir }}/"
-        rsync_opts:
-          - "--exclude=.git"
-          - "--exclude=node_modules"
-      delegate_to: "{{ inventory_hostname }}"
+    - name: Copy frontend files
+      command: "cp -r {{ tmp_dir }}/frontend/* {{ frontend_dir }}/"
+      when: backend_dir_stat.stat.exists
 
     - name: Setup Python virtual environment
       pip:

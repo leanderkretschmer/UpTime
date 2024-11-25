@@ -70,8 +70,22 @@
     - name: Copy backend files
       shell: "cp -r {{ tmp_dir }}/backend/* {{ backend_dir }}/ || true"
 
-    - name: Initialize Vue.js project
-      command: "npm create vite@latest {{ frontend_dir }} -- --template vue-ts --force"
+    - name: Install Vite globally
+      npm:
+        name: create-vite
+        global: yes
+        state: present
+
+    - name: Create Vue project directory
+      file:
+        path: "{{ frontend_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Initialize Vue.js project with Vite
+      shell: |
+        cd {{ frontend_dir }}
+        npm init vite@latest . --template vue-ts -- --force < /dev/null
       args:
         creates: "{{ frontend_dir }}/package.json"
 

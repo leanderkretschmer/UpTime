@@ -434,10 +434,120 @@
         name: nginx
         state: restarted
 
+    - name: Add MongoDB GPG key
+      apt_key:
+        url: https://www.mongodb.org/static/pgp/server-6.0.asc
+        state: present
+
+    - name: Add MongoDB repository
+      apt_repository:
+        repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/6.0 multiverse"
+        state: present
+        filename: mongodb-org-6.0
+
+    - name: Install Alerta dependencies
+      apt:
+        name:
+          - python3-pip
+          - mongodb-org
+          - nginx
+          - python3-dev
+          - build-essential
+          - libffi-dev
+        state: present
+        update_cache: yes
+
+    - name: Install Alerta via pip
+      pip:
+        name: alerta-server
+        state: present
+
+    - name: Create Alerta configuration directory
+      file:
+        path: /etc/alerta
+        state: directory
+        mode: '0755'
+
+    - name: Configure Alerta
+      template:
+        src: alerta.conf.j2
+        dest: /etc/alerta/alerta.conf
+        mode: '0644'
+      notify: restart alerta
+
+    - name: Configure Nginx for Alerta
+      template:
+        src: nginx-alerta.conf.j2
+        dest: /etc/nginx/sites-available/alerta
+      notify: reload nginx
+
+    - name: Enable Alerta site
+      file:
+        src: /etc/nginx/sites-available/alerta
+        dest: /etc/nginx/sites-enabled/alerta
+        state: link
+      notify: reload nginx
+
+    - name: Create Alerta systemd service
+      template:
+        src: alerta.service.j2
+        dest: /etc/systemd/system/alerta.service
+      notify: restart alerta
+
+    - name: Create Alerta user
+      user:
+        name: alerta
+        system: yes
+        shell: /bin/false
+        home: /opt/alerta
+
+    - name: Set Alerta permissions
+      file:
+        path: /etc/alerta
+        owner: alerta
+        group: alerta
+        recurse: yes
+
+    - name: Start and enable Alerta
+      systemd:
+        name: alerta
+        state: started
+        enabled: yes
+
+    - name: Create Alerta admin user
+      command: "alerta user create admin --password {{ alerta_admin_password }} --admin"
+      environment:
+        FLASK_APP: /usr/local/bin/alertad
+      when: alerta_admin_password is defined
+
+    - name: Create Alerta API key
+      command: "alerta key create --username admin --scope 'admin,read,write'"
+      environment:
+        FLASK_APP: /usr/local/bin/alertad
+      register: alerta_api_key
+      when: alerta_admin_password is defined
+
+    - name: Display Alerta information
+      debug:
+        msg: 
+          - "Alerta web interface is available at: http://{{ ansible_host }}:8080"
+          - "API key: {{ alerta_api_key.stdout | default('Not created - password not provided') }}"
+
   handlers:
     - name: Restart backend service
       systemd:
         name: monitoring-backend
         state: restarted
         daemon_reload: yes
-        enabled: yes 
+        enabled: yes
+
+    - name: restart alerta
+      systemd:
+        name: alerta
+        state: restarted
+        daemon_reload: yes
+
+    - name: reload nginx
+      systemd:
+        name: nginx
+        state: reloaded

@@ -348,10 +348,31 @@
             }
           }
 
+    - name: Set correct ownership and permissions
+      file:
+        path: "{{ item }}"
+        owner: root
+        group: root
+        recurse: yes
+        mode: '0755'
+      with_items:
+        - "{{ frontend_dir }}"
+        - "{{ backend_dir }}"
+
     - name: Install frontend dependencies
       npm:
         path: "{{ frontend_dir }}"
         state: present
+      become: yes
+
+    - name: Create npm start script
+      copy:
+        dest: "/usr/local/bin/start-frontend"
+        mode: '0755'
+        content: |
+          #!/bin/bash
+          cd {{ frontend_dir }}
+          npm run dev
 
     - name: Build frontend
       command: npm run build

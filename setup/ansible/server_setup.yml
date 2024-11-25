@@ -448,15 +448,39 @@
     - name: Install Alerta dependencies
       apt:
         name:
-          - alerta
-          - alerta-web
-          - mongodb-org
-          - nginx
+          - python3-venv
           - python3-dev
           - build-essential
           - libffi-dev
+          - mongodb-org
+          - nginx
         state: present
         update_cache: yes
+
+    - name: Create Alerta directory
+      file:
+        path: /opt/alerta
+        state: directory
+        mode: '0755'
+        owner: alerta
+        group: alerta
+
+    - name: Create Alerta virtualenv
+      command: python3 -m venv /opt/alerta/venv
+      args:
+        creates: /opt/alerta/venv/bin/python
+      become: yes
+      become_user: alerta
+
+    - name: Install Alerta in virtualenv
+      pip:
+        name: 
+          - alerta-server
+          - alerta
+        virtualenv: /opt/alerta/venv
+        state: present
+      become: yes
+      become_user: alerta
 
     - name: Create Alerta configuration directory
       file:

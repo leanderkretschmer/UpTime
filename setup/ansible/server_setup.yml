@@ -365,6 +365,47 @@
         dest: /etc/systemd/system/monitoring-backend.service
       notify: Restart backend service
 
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Configure nginx
+      copy:
+        dest: /etc/nginx/sites-available/uptime
+        content: |
+          server {
+              listen 80;
+              server_name _;
+
+              location / {
+                  root {{ frontend_dir }}/dist;
+                  try_files $uri $uri/ /index.html;
+              }
+
+              location /api {
+                  proxy_pass http://localhost:5000;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+              }
+          }
+
+    - name: Enable nginx site
+      file:
+        src: /etc/nginx/sites-available/uptime
+        dest: /etc/nginx/sites-enabled/uptime
+        state: link
+
+    - name: Remove default nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Restart nginx
+      systemd:
+        name: nginx
+        state: restarted
+
   handlers:
     - name: Restart backend service
       systemd:

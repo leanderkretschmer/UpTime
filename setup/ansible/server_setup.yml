@@ -23,6 +23,10 @@
           - postgresql
           - postgresql-contrib
           - rsync
+          - postgresql-server-dev-all
+          - libpq-dev
+          - python3-dev
+          - gcc
         state: present
         update_cache: yes
 
@@ -43,6 +47,14 @@
         dest: "{{ tmp_dir }}"
         version: main
 
+    - name: Debug repository content
+      command: ls -la {{ tmp_dir }}
+      register: repo_content
+
+    - name: Show repository content
+      debug:
+        var: repo_content.stdout_lines
+
     - name: Create backend directory
       file:
         path: "{{ backend_dir }}"
@@ -56,12 +68,10 @@
         mode: '0755'
 
     - name: Copy backend files
-      command: "cp -r {{ tmp_dir }}/backend/* {{ backend_dir }}/"
-      ignore_errors: yes
+      shell: "cp -r {{ tmp_dir }}/backend/* {{ backend_dir }}/ || true"
 
     - name: Copy frontend files
-      command: "cp -r {{ tmp_dir }}/frontend/* {{ frontend_dir }}/"
-      ignore_errors: yes
+      shell: "cp -r {{ tmp_dir }}/frontend/* {{ frontend_dir }}/ || true"
 
     - name: Create requirements.txt
       copy:

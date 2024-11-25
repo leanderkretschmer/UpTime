@@ -1,0 +1,12 @@
+[Unit]
+Description=Monitoring Backend Service
+After=network.target
+
+[Service]
+User=monitoring
+WorkingDirectory={{ backend_dir }}
+Environment="PATH={{ backend_dir }}/venv/bin"
+ExecStart={{ backend_dir }}/venv/bin/gunicorn -w 4 -b 0.0.0.0:5000 app:app
+
+[Install]
+WantedBy=multi-user.target 

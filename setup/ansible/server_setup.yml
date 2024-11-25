@@ -1,0 +1,116 @@
+---
+- name: Setup Monitoring System
+  hosts: all
+  become: yes
+  vars:
+    git_repo: "https://github.com/leanderkretschmer/UpTime/"
+    tmp_dir: "/tmp/monitoring_setup"
+    frontend_dir: "/opt/monitoring/frontend"
+    backend_dir: "/opt/monitoring/backend"
+    python_version: "3.8"
+    node_version: "16"
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - git
+          - python3
+          - python3-pip
+          - python3-venv
+          - nodejs
+          - npm
+          - postgresql
+          - postgresql-contrib
+        state: present
+        update_cache: yes
+
+    - name: Create temporary directory
+      file:
+        path: "{{ tmp_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Clone repository
+      git:
+        repo: "{{ git_repo }}"
+        dest: "{{ tmp_dir }}"
+        version: main
+
+    - name: Create backend directory
+      file:
+        path: "{{ backend_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Create frontend directory
+      file:
+        path: "{{ frontend_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy backend files
+      copy:
+        src: "{{ tmp_dir }}/backend/{{ item }}"
+        dest: "{{ backend_dir }}/"
+        mode: '0644'
+      with_items:
+        - app.py
+        - models.py
+        - init_db.py
+        - requirements.txt
+        - .env
+
+    - name: Copy frontend files
+      copy:
+        src: "{{ tmp_dir }}/frontend/{{ item }}"
+        dest: "{{ frontend_dir }}/"
+        mode: '0644'
+      with_items:
+        - package.json
+        - vite.config.ts
+        - tsconfig.json
+        - tailwind.config.js
+        - .env
+        - index.html
+        - src/
+
+    - name: Setup Python virtual environment
+      pip:
+        requirements: "{{ backend_dir }}/requirements.txt"
+        virtualenv: "{{ backend_dir }}/venv"
+        virtualenv_command: python3 -m venv
+
+    - name: Install frontend dependencies
+      npm:
+        path: "{{ frontend_dir }}"
+        state: present
+
+    - name: Build frontend
+      command: npm run build
+      args:
+        chdir: "{{ frontend_dir }}"
+
+    - name: Initialize database
+      command: "{{ backend_dir }}/venv/bin/python {{ backend_dir }}/init_db.py"
+      environment:
+        PYTHONPATH: "{{ backend_dir }}"
+
+    - name: Clean up temporary directory
+      file:
+        path: "{{ tmp_dir }}"
+        state: absent
+
+    - name: Create systemd service for backend
+      template:
+        src: backend.service.j2
+        dest: /etc/systemd/system/monitoring-backend.service
+      notify: Restart backend service
+
+  handlers:
+    - name: Restart backend service
+      systemd:
+        name: monitoring-backend
+        state: restarted
+        daemon_reload: yes
+        enabled: yes 

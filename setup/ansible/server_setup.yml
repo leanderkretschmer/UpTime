@@ -533,21 +533,35 @@
           - "Alerta web interface is available at: http://{{ ansible_host }}:8080"
           - "API key: {{ alerta_api_key.stdout | default('Not created - password not provided') }}"
 
-    - name: Install python3-venv
+    - name: Install python3-venv and python3-full
       apt:
-        name: python3-venv
+        name:
+          - python3-venv
+          - python3-full
         state: present
+
+    - name: Create Alerta directory
+      file:
+        path: /opt/alerta
+        state: directory
+        mode: '0755'
+        owner: alerta
+        group: alerta
 
     - name: Create Alerta virtualenv
       command: python3 -m venv /opt/alerta/venv
       args:
         creates: /opt/alerta/venv/bin/python
+      become: yes
+      become_user: alerta
 
     - name: Install Alerta in virtualenv
       pip:
         name: alerta-server
         virtualenv: /opt/alerta/venv
         state: present
+      become: yes
+      become_user: alerta
 
     - name: Create Alerta configuration directory
       file:

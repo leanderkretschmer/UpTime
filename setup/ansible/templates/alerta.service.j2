@@ -7,7 +7,7 @@ Type=simple
 User=alerta
 Group=alerta
 Environment="ALERTA_SVR_CONF_FILE=/etc/alerta/alerta.conf"
-ExecStart=/usr/local/bin/alertad run
+ExecStart=/opt/alerta/venv/bin/alertad run
 Restart=always
 
 [Install]

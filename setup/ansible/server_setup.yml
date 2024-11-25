@@ -436,14 +436,14 @@
 
     - name: Add MongoDB GPG key
       apt_key:
-        url: https://www.mongodb.org/static/pgp/server-6.0.asc
+        url: https://pgp.mongodb.com/server-7.0.asc
         state: present
 
     - name: Add MongoDB repository
       apt_repository:
-        repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/6.0 multiverse"
+        repo: "deb https://repo.mongodb.org/apt/debian bookworm/mongodb-org/7.0 main"
         state: present
-        filename: mongodb-org-6.0
+        filename: mongodb-org-7.0
 
     - name: Install Alerta dependencies
       apt:
@@ -532,6 +532,30 @@
         msg: 
           - "Alerta web interface is available at: http://{{ ansible_host }}:8080"
           - "API key: {{ alerta_api_key.stdout | default('Not created - password not provided') }}"
+
+    - name: Create Alerta virtualenv
+      pip:
+        name: virtualenv
+        state: present
+
+    - name: Create Alerta directory
+      file:
+        path: /opt/alerta
+        state: directory
+        mode: '0755'
+
+    - name: Setup Alerta virtualenv
+      pip:
+        name: alerta-server
+        virtualenv: /opt/alerta/venv
+        virtualenv_command: python3 -m venv
+
+    - name: Update Alerta service file
+      template:
+        src: alerta.service.j2
+        dest: /etc/systemd/system/alerta.service
+        mode: '0644'
+      notify: restart alerta
 
   handlers:
     - name: Restart backend service

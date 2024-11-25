@@ -49,31 +49,23 @@
         state: directory
         mode: '0755'
 
-    - name: Copy backend files
-      copy:
-        src: "{{ tmp_dir }}/backend/{{ item }}"
+    - name: Synchronize backend files
+      synchronize:
+        src: "{{ tmp_dir }}/backend/"
         dest: "{{ backend_dir }}/"
-        mode: '0644'
-      with_items:
-        - app.py
-        - models.py
-        - init_db.py
-        - requirements.txt
-        - .env
+        rsync_opts:
+          - "--exclude=.git"
+          - "--exclude=__pycache__"
+      delegate_to: "{{ inventory_hostname }}"
 
-    - name: Copy frontend files
-      copy:
-        src: "{{ tmp_dir }}/frontend/{{ item }}"
+    - name: Synchronize frontend files
+      synchronize:
+        src: "{{ tmp_dir }}/frontend/"
         dest: "{{ frontend_dir }}/"
-        mode: '0644'
-      with_items:
-        - package.json
-        - vite.config.ts
-        - tsconfig.json
-        - tailwind.config.js
-        - .env
-        - index.html
-        - src/
+        rsync_opts:
+          - "--exclude=.git"
+          - "--exclude=node_modules"
+      delegate_to: "{{ inventory_hostname }}"
 
     - name: Setup Python virtual environment
       pip:

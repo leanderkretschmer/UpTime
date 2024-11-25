@@ -1,0 +1,33 @@
+---
+- name: Setup Monitoring Base System
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - python3-pip
+          - python3-venv
+          - nginx
+          - postgresql
+          - git
+        state: present
+        update_cache: yes
+
+    - name: Create monitoring user
+      user:
+        name: monitoring
+        shell: /bin/bash
+        groups: sudo
+        append: yes
+
+    - name: Setup Alerta
+      pip:
+        name: alerta-server
+        state: present
+
+    - name: Configure Alerta
+      template:
+        src: alerta.conf.j2
+        dest: /etc/alertad.conf 

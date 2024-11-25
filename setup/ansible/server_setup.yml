@@ -217,6 +217,26 @@
         - src/assets
         - public
 
+    - name: Create App.vue
+      copy:
+        dest: "{{ frontend_dir }}/src/App.vue"
+        content: |
+          <template>
+            <div>
+              <!-- ... Rest des App.vue Inhalts ... -->
+            </div>
+          </template>
+
+    - name: Create Settings.vue
+      copy:
+        dest: "{{ frontend_dir }}/src/views/Settings.vue"
+        content: |
+          <template>
+            <div>
+              <!-- ... Rest des Settings.vue Inhalts ... -->
+            </div>
+          </template>
+
     - name: Create index.html
       copy:
         dest: "{{ frontend_dir }}/index.html"
@@ -243,222 +263,6 @@
           import App from './App.vue'
           
           createApp(App).mount('#app')
-
-    - name: Create App.vue
-      copy:
-        dest: "{{ frontend_dir }}/src/App.vue"
-        content: |
-          <template>
-            <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-              <!-- Navigation -->
-              <nav class="bg-white dark:bg-gray-800 shadow-sm h-[44px] flex items-center">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                  <div class="flex justify-between">
-                    <div class="flex items-center">
-                      <router-link to="/" class="text-xl font-semibold text-gray-900 dark:text-white">
-                        UpTime
-                      </router-link>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                      <router-link 
-                        v-for="item in navigation" 
-                        :key="item.name"
-                        :to="item.href"
-                        class="px-3 py-2 text-sm font-medium min-w-[44px] min-h-[44px] flex items-center justify-center"
-                        :class="[
-                          $route.path === item.href
-                            ? 'text-blue-600 dark:text-blue-400'
-                            : 'text-gray-700 dark:text-gray-300'
-                        ]"
-                      >
-                        {{ item.name }}
-                      </router-link>
-                    </div>
-                  </div>
-                </div>
-              </nav>
-
-              <!-- Main Content -->
-              <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                <router-view />
-              </main>
-            </div>
-          </template>
-
-          <script setup lang="ts">
-          const navigation = [
-            { name: 'Dashboard', href: '/' },
-            { name: 'Systeme', href: '/systems' },
-            { name: 'Einstellungen', href: '/settings' }
-          ]
-          </script>
-
-          <style>
-          body {
-            font-size: 11pt;
-            line-height: 1.4;
-            letter-spacing: 0.01em;
-          }
-          </style>
-
-    - name: Create Settings.vue
-      copy:
-        dest: "{{ frontend_dir }}/src/views/Settings.vue"
-        content: |
-          <template>
-            <div class="space-y-6">
-              <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-6">Simulierte Systeme</h2>
-                
-                <!-- System List -->
-                <div class="space-y-4 mb-6">
-                  <div v-for="system in systems" :key="system.id" 
-                       class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ system.name }}</p>
-                      <p class="text-sm text-gray-500 dark:text-gray-400">{{ system.ip }}</p>
-                    </div>
-                    <button @click="removeSystem(system.id)"
-                            class="min-w-[44px] min-h-[44px] text-red-600 hover:text-red-800 dark:text-red-400">
-                      Entfernen
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Add System Form -->
-                <form @submit.prevent="addSystem" class="space-y-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Systemname
-                    </label>
-                    <input v-model="newSystem.name" type="text" required
-                           class="w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-md"
-                           placeholder="z.B. Webserver">
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      IP-Adresse
-                    </label>
-                    <input v-model="newSystem.ip" type="text" required
-                           class="w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-md"
-                           placeholder="z.B. 192.168.1.100">
-                  </div>
-                  <button type="submit"
-                          class="min-h-[44px] px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                    System hinzufügen
-                  </button>
-                </form>
-              </div>
-
-              <!-- Services Section -->
-              <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-6">Simulierte Services</h2>
-                
-                <!-- Service List -->
-                <div class="space-y-4 mb-6">
-                  <div v-for="service in services" :key="service.id"
-                       class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ service.name }}</p>
-                      <p class="text-sm text-gray-500 dark:text-gray-400">Port: {{ service.port }}</p>
-                    </div>
-                    <button @click="removeService(service.id)"
-                            class="min-w-[44px] min-h-[44px] text-red-600 hover:text-red-800 dark:text-red-400">
-                      Entfernen
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Add Service Form -->
-                <form @submit.prevent="addService" class="space-y-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Servicename
-                    </label>
-                    <input v-model="newService.name" type="text" required
-                           class="w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-md"
-                           placeholder="z.B. HTTP">
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Port
-                    </label>
-                    <input v-model="newService.port" type="number" required
-                           class="w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-md"
-                           placeholder="z.B. 80">
-                  </div>
-                  <button type="submit"
-                          class="min-h-[44px] px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                    Service hinzufügen
-                  </button>
-                </form>
-              </div>
-            </div>
-          </template>
-
-          <script setup lang="ts">
-          import { ref } from 'vue'
-          import axios from 'axios'
-
-          const systems = ref([])
-          const services = ref([])
-          const newSystem = ref({ name: '', ip: '' })
-          const newService = ref({ name: '', port: '' })
-
-          const addSystem = async () => {
-            try {
-              const response = await axios.post('/api/systems', newSystem.value)
-              systems.value.push(response.data)
-              newSystem.value = { name: '', ip: '' }
-            } catch (error) {
-              console.error('Error adding system:', error)
-            }
-          }
-
-          const removeSystem = async (id) => {
-            try {
-              await axios.delete(`/api/systems/${id}`)
-              systems.value = systems.value.filter(s => s.id !== id)
-            } catch (error) {
-              console.error('Error removing system:', error)
-            }
-          }
-
-          const addService = async () => {
-            try {
-              const response = await axios.post('/api/services', newService.value)
-              services.value.push(response.data)
-              newService.value = { name: '', port: '' }
-            } catch (error) {
-              console.error('Error adding service:', error)
-            }
-          }
-
-          const removeService = async (id) => {
-            try {
-              await axios.delete(`/api/services/${id}`)
-              services.value = services.value.filter(s => s.id !== id)
-            } catch (error) {
-              console.error('Error removing service:', error)
-            }
-          }
-
-          // Load initial data
-          const fetchData = async () => {
-            try {
-              const [systemsRes, servicesRes] = await Promise.all([
-                axios.get('/api/systems'),
-                axios.get('/api/services')
-              ])
-              systems.value = systemsRes.data
-              services.value = servicesRes.data
-            } catch (error) {
-              console.error('Error fetching data:', error)
-            }
-          }
-
-          fetchData()
-          </script>
 
     - name: Create vite.config.ts
       copy:

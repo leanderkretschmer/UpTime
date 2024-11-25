@@ -7,8 +7,9 @@
     tmp_dir: "/tmp/monitoring_setup"
     frontend_dir: "/opt/monitoring/frontend"
     backend_dir: "/opt/monitoring/backend"
-    python_version: "3.8"
-    node_version: "16"
+    db_user: "uptime_user"
+    db_password: "your_password"
+    db_name: "uptime"
 
   tasks:
     - name: Install required packages
@@ -117,11 +118,34 @@
               def check_password(self, password):
                   return check_password_hash(self.password_hash, password)
 
+    - name: Ensure PostgreSQL is started
+      systemd:
+        name: postgresql
+        state: started
+        enabled: yes
+
+    - name: Create PostgreSQL user
+      become: yes
+      become_user: postgres
+      postgresql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        role_attr_flags: CREATEDB,NOSUPERUSER
+
+    - name: Create PostgreSQL database
+      become: yes
+      become_user: postgres
+      postgresql_db:
+        name: "{{ db_name }}"
+        owner: "{{ db_user }}"
+        encoding: UTF8
+        template: template0
+
     - name: Create .env for backend
       copy:
         dest: "{{ backend_dir }}/.env"
         content: |
-          DATABASE_URL=postgresql://uptime_user:your_password@localhost/uptime
+          DATABASE_URL=postgresql://{{ db_user }}:{{ db_password }}@localhost/{{ db_name }}
           JWT_SECRET_KEY=your-secret-key
           FLASK_ENV=development
 

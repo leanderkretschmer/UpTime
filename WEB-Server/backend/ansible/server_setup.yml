@@ -1,0 +1,36 @@
+---
+- name: Setup monitoring agent
+  hosts: "{{ server_ip }}"
+  become: yes
+  vars:
+    monitoring_user: uptime
+    
+  tasks:
+    - name: Create monitoring user
+      user:
+        name: "{{ monitoring_user }}"
+        shell: /bin/bash
+        
+    - name: Install required packages
+      apt:
+        name:
+          - python3
+          - python3-pip
+          - nginx
+        state: present
+        
+    - name: Install monitoring agent
+      pip:
+        name: uptime-agent
+        state: present
+        
+    - name: Configure monitoring agent
+      template:
+        src: agent.conf.j2
+        dest: /etc/uptime/agent.conf
+        
+    - name: Start monitoring service
+      systemd:
+        name: uptime-agent
+        state: started
+        enabled: yes 
